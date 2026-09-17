@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Reset OS — Rudransh</title>
+<style>
+  :root{
+    --paper:#EDE7DA;
+    --paper-dim:#E1DAC8;
+    --ink:#1E2A22;
+    --ink-soft:#4B5A4E;
+    --rule:#C9BFA6;
+    --gold:#A6742E;
+    --sage:#5C7259;
+    --rust:#93412C;
+    --card:#F5F1E6;
+    --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    --serif: Georgia, "Iowan Old Style", "Palatino Linotype", serif;
+  }
+  [data-theme="dark"]{
+    --paper:#171C18;
+    --paper-dim:#12160F;
+    --ink:#E9E4D6;
+    --ink-soft:#A9B0A2;
+    --rule:#333B2E;
+    --gold:#D6A45A;
+    --sage:#8FAE8A;
+    --rust:#C97A63;
+    --card:#1E2419;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--serif);
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:72px;
+    min-height:100vh;
+  }
+  a{color:inherit;}
+  .wrap{max-width:640px;margin:0 auto;padding:20px 18px 8px;}
+
+  header.top{
+    display:flex;justify-content:space-between;align-items:baseline;
+    padding-bottom:14px;border-bottom:1px solid var(--rule);
+    margin-bottom:18px;
+  }
+  header.top .brand{font-size:1.35rem;letter-spacing:.2px;}
+  header.top .brand em{font-style:italic;color:var(--gold);}
+  header.top .date{font-family:var(--mono);font-size:.72rem;color:var(--ink-soft);}
+  .theme-btn{
+    font-family:var(--mono);font-size:.68rem;background:none;border:1px solid var(--rule);
+    color:var(--ink-soft);padding:4px 8px;border-radius:3px;cursor:pointer;
+  }
+
+  section{display:none;}
+  section.active{display:block;animation:fade .25s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  h2.section-title{
+    font-size:1.05rem;margin:0 0 14px;font-weight:normal;
+    display:flex;align-items:baseline;gap:8px;
+  }
+  h2.section-title .num{font-family:var(--mono);font-size:.72rem;color:var(--gold);}
+
+  .card{
+    background:var(--card);border:1px solid var(--rule);border-radius:2px;
+    padding:16px 16px;margin-bottom:14px;
+  }
+  .card h3{margin:0 0 10px;font-size:.95rem;font-weight:normal;color:var(--ink);}
+  .card p{margin:0 0 8px;font-size:.9rem;line-height:1.5;color:var(--ink-soft);}
+  .muted{color:var(--ink-soft);font-size:.82rem;line-height:1.5;}
+
+  /* Dashboard */
+  .phase-strip{display:flex;gap:6px;margin-bottom:16px;}
+  .phase-strip .p{
+    flex:1;padding:8px 6px;text-align:center;font-family:var(--mono);font-size:.66rem;
+    border:1px solid var(--rule);border-radius:2px;color:var(--ink-soft);
+  }
+  .phase-strip .p.now{border-color:var(--gold);color:var(--gold);background:rgba(166,116,46,.08);}
+  .big-stat{display:flex;gap:14px;margin-bottom:16px;}
+  .big-stat .s{flex:1;background:var(--card);border:1px solid var(--rule);padding:14px;border-radius:2px;text-align:center;}
+  .big-stat .s .n{font-family:var(--mono);font-size:1.6rem;color:var(--gold);}
+  .big-stat .s .l{font-size:.68rem;color:var(--ink-soft);margin-top:2px;font-family:var(--mono);}
+  .quote{border-left:2px solid var(--gold);padding-left:12px;font-style:italic;color:var(--ink-soft);font-size:.88rem;margin:16px 0;}
+
+  /* Checklist */
+  ul.checklist{list-style:none;padding:0;margin:0;}
+  ul.checklist li{
+    display:flex;align-items:center;gap:10px;padding:10px 2px;
+    border-bottom:1px solid var(--rule);font-family:var(--mono);font-size:.85rem;
+  }
+  ul.checklist li:last-child{border-bottom:none;}
+  ul.checklist input[type="checkbox"]{
+    width:18px;height:18px;accent-color:var(--sage);flex-shrink:0;
+  }
+  ul.checklist li.done label{color:var(--ink-soft);text-decoration:line-through;}
+  .habit-progress{font-family:var(--mono);font-size:.75rem;color:var(--ink-soft);margin:10px 0 4px;}
+  .reset-btn{
+    margin-top:10px;font-family:var(--mono);font-size:.68rem;background:none;
+    border:1px solid var(--rule);color:var(--ink-soft);padding:6px 10px;border-radius:3px;cursor:pointer;
+  }
+  .streak-note{font-family:var(--mono);font-size:.72rem;color:var(--sage);margin-top:8px;}
+
+  /* Tables */
+  table{width:100%;border-collapse:collapse;font-size:.85rem;}
+  table th, table td{text-align:left;padding:6px 4px;border-bottom:1px solid var(--rule);}
+  table th{font-family:var(--mono);font-size:.68rem;color:var(--ink-soft);font-weight:normal;}
+  table td.pri{font-family:var(--mono);color:var(--gold);}
+
+  ul.rules-list{margin:0;padding-left:18px;font-size:.87rem;line-height:1.7;color:var(--ink-soft);}
+  ul.rules-list li::marker{color:var(--rust);}
+
+  .day-row{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--rule);font-size:.85rem;}
+  .day-row:last-child{border-bottom:none;}
+  .day-row .d{font-family:var(--mono);color:var(--gold);width:52px;flex-shrink:0;}
+
+  .journal-note{
+    background:transparent;border:1px dashed var(--rule);border-radius:2px;
+    padding:12px;font-size:.85rem;color:var(--ink-soft);line-height:1.6;
+  }
+
+  /* Bottom nav */
+  nav.tabs{
+    position:fixed;bottom:0;left:0;right:0;
+    display:flex;justify-content:space-around;
+    background:var(--paper-dim);border-top:1px solid var(--rule);
+    padding:8px 2px calc(8px + env(safe-area-inset-bottom));
+    z-index:10;
+  }
+  nav.tabs button{
+    background:none;border:none;color:var(--ink-soft);font-family:var(--mono);
+    font-size:.62rem;display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:4px 2px;cursor:pointer;flex:1;
+  }
+  nav.tabs button .dot{width:5px;height:5px;border-radius:50%;background:transparent;}
+  nav.tabs button.active{color:var(--gold);}
+  nav.tabs button.active .dot{background:var(--gold);}
+</style>
+</head>
+<body data-theme="dark">
+<div class="wrap">
+
+  <header class="top">
+    <div class="brand">Reset <em>OS</em></div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <span class="date" id="todayLabel"></span>
+      <button class="theme-btn" id="themeToggle">paper</button>
+    </div>
+  </header>
+
+  <!-- DASHBOARD -->
+  <section id="sec-dashboard" class="active">
+    <h2 class="section-title"><span class="num">00</span> Dashboard</h2>
+
+    <div class="phase-strip">
+      <div class="p" data-phase="1">Reset<br>Sep</div>
+      <div class="p" data-phase="2">Build<br>Oct</div>
+      <div class="p" data-phase="3">Execute<br>Nov</div>
+      <div class="p" data-phase="4">Consolidate<br>Dec</div>
+    </div>
+
+    <div class="big-stat">
+      <div class="s"><div class="n" id="dayCount">—</div><div class="l">day of 105</div></div>
+      <div class="s"><div class="n" id="doneToday">0/7</div><div class="l">today's checklist</div></div>
+    </div>
+
+    <div class="card">
+      <h3>Current focus</h3>
+      <p id="focusText">Loading phase focus…</p>
+    </div>
+
+    <div class="quote">"The goal is not a perfect streak. The goal is to become someone who consistently follows a system — even when motivation is low."</div>
+  </section>
+
+  <!-- DAILY HABITS -->
+  <section id="sec-habits">
+    <h2 class="section-title"><span class="num">01</span> Daily Habits</h2>
+    <div class="card">
+      <h3 id="habitDate">Today</h3>
+      <ul class="checklist" id="checklist">
+        <li data-key="dsa"><input type="checkbox" id="c1"><label for="c1">30 min programming / DSA</label></li>
+        <li data-key="revision"><input type="checkbox" id="c2"><label for="c2">College study or revision</label></li>
+        <li data-key="scroll"><input type="checkbox" id="c3"><label for="c3">No uncontrolled doomscrolling</label></li>
+        <li data-key="exercise"><input type="checkbox" id="c4"><label for="c4">Exercise / mobility</label></li>
+        <li data-key="trading"><input type="checkbox" id="c5"><label for="c5">Trading rules followed</label></li>
+        <li data-key="phone"><input type="checkbox" id="c6"><label for="c6">Phone away before sleep</label></li>
+        <li data-key="review"><input type="checkbox" id="c7"><label for="c7">10-minute daily review</label></li>
+      </ul>
+      <div class="habit-progress" id="progressLine">0 / 7 complete</div>
+      <button class="reset-btn" id="resetToday">Reset today's checklist</button>
+    </div>
+
+    <div class="card">
+      <h3>Non-negotiables until Dec 31</h3>
+      <ul class="rules-list">
+        <li>Never miss twice — one missed day is recoverable, a pattern isn't.</li>
+        <li>Study to a fixed minimum, not to your mood.</li>
+        <li>Phone away during focused work.</li>
+        <li>Protect sleep.</li>
+        <li>Don't use trading to escape financial pressure.</li>
+        <li>Review progress every Sunday.</li>
+        <li>Cut the number of goals if the workload gets unrealistic.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PLAN B: SDE -->
+  <section id="sec-sde">
+    <h2 class="section-title"><span class="num">02</span> Plan B — SDE</h2>
+    <div class="card">
+      <h3>Sep–Dec target</h3>
+      <p>Java + DSA + SQL + Git/GitHub, then into backend development. Don't add AI, cloud, cybersecurity or multiple frameworks at the same time — foundation first.</p>
+    </div>
+    <div class="card">
+      <h3>Learning priority</h3>
+      <table>
+        <tr><th>#</th><th>Topic</th></tr>
+        <tr><td class="pri">1</td><td>Java fundamentals</td></tr>
+        <tr><td class="pri">2</td><td>OOP</td></tr>
+        <tr><td class="pri">3</td><td>Arrays, strings, hashing</td></tr>
+        <tr><td class="pri">4</td><td>SQL / DBMS</td></tr>
+        <tr><td class="pri">5</td><td>Git and GitHub</td></tr>
+        <tr><td class="pri">6</td><td>Basic Linux</td></tr>
+        <tr><td class="pri">7</td><td>Small practical project</td></tr>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Dec 31 target</h3>
+      <ul class="rules-list">
+        <li>Java fundamentals completed</li>
+        <li>DSA basics practiced consistently</li>
+        <li>SQL fundamentals understood</li>
+        <li>GitHub repository with meaningful work</li>
+        <li>One functional project or substantial milestone</li>
+        <li>A repeatable study routine</li>
+      </ul>
+      <p class="muted" style="margin-top:8px;">Execution targets — not a guarantee of an internship or job.</p>
+    </div>
+  </section>
+
+  <!-- PLAN A: TRADING -->
+  <section id="sec-trading">
+    <h2 class="section-title"><span class="num">03</span> Plan A — Trading</h2>
+    <div class="card">
+      <h3>Boundary</h3>
+      <p>Until your financial situation is stable: paper trading and education only. XAUUSD study continues as a learning activity — college-fee savings and essential money are never at risk.</p>
+    </div>
+    <div class="card">
+      <h3>Progression</h3>
+      <div class="day-row"><div class="d">1</div><div>Learn one setup — 4H → 1H → 15M → 5M structure, liquidity, levels, entry rules.</div></div>
+      <div class="day-row"><div class="d">2</div><div>Backtest — review historical examples, document whether the setup meets its own rules.</div></div>
+      <div class="day-row"><div class="d">3</div><div>Paper trade — record entry, stop loss, target, reasoning, risk, outcome.</div></div>
+      <div class="day-row"><div class="d">4</div><div>Evaluate — review a meaningful sample, including losers and rule violations.</div></div>
+      <div class="day-row"><div class="d">5</div><div>Only later, live capital — after stability, demonstrated consistency, a defined risk budget. Never guaranteed.</div></div>
+    </div>
+    <div class="card">
+      <h3>Rules</h3>
+      <ul class="rules-list">
+        <li>No revenge trading.</li>
+        <li>No increasing risk to recover losses.</li>
+        <li>No trading with college-fee or emergency money.</li>
+        <li>No switching strategies every few days.</li>
+        <li>No live trading just because paper trading had one good week.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 105-DAY ROADMAP -->
+  <section id="sec-roadmap">
+    <h2 class="section-title"><span class="num">04</span> 105-Day Roadmap</h2>
+
+    <div class="card">
+      <h3>Phase 1 — Reset · Sep 17–30</h3>
+      <ul class="rules-list">
+        <li>Remove major triggers</li>
+        <li>Establish sleep/wake consistency</li>
+        <li>Study daily, even if only 30 min</li>
+        <li>Stop impulsive trading</li>
+        <li>Track your habits</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Phase 2 — Build · October</h3>
+      <ul class="rules-list">
+        <li>Consistent Java/DSA study</li>
+        <li>Build first structured project</li>
+        <li>Maintain exercise</li>
+        <li>Trade only within a defined learning system</li>
+        <li>Reduce screen time through practical controls</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Phase 3 — Execute · November</h3>
+      <ul class="rules-list">
+        <li>Increase technical depth</li>
+        <li>Complete a meaningful project milestone</li>
+        <li>Start preparing for internships</li>
+        <li>Review trading journal and paper-trading performance</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Phase 4 — Consolidate · December</h3>
+      <ul class="rules-list">
+        <li>Complete the year's key learning targets</li>
+        <li>Review habits and progress</li>
+        <li>Define 2027 SDE roadmap</li>
+        <li>Decide on trading based on evidence — not excitement</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>First 7 days</h3>
+      <div class="day-row"><div class="d">Day 1</div><div>Remove distractions + write your goals</div></div>
+      <div class="day-row"><div class="d">Day 2</div><div>Start Java revision</div></div>
+      <div class="day-row"><div class="d">Day 3</div><div>Solve 3 basic DSA problems</div></div>
+      <div class="day-row"><div class="d">Day 4</div><div>Establish study routine</div></div>
+      <div class="day-row"><div class="d">Day 5</div><div>Practice SQL</div></div>
+      <div class="day-row"><div class="d">Day 6</div><div>Review trading rules, paper-only</div></div>
+      <div class="day-row"><div class="d">Day 7</div><div>Weekly review and adjust</div></div>
+    </div>
+  </section>
+
+  <!-- RULES -->
+  <section id="sec-rules">
+    <h2 class="section-title"><span class="num">05</span> Rules</h2>
+
+    <div class="card">
+      <h3>Phone / doomscrolling reset</h3>
+      <ul class="rules-list">
+        <li>No social media immediately after waking</li>
+        <li>No phone during study sessions</li>
+        <li>Log out of the most distracting apps for 14 days</li>
+        <li>Disable unnecessary notifications</li>
+        <li>Keep the phone away from your bed</li>
+        <li>Use a fixed entertainment window instead of opening apps whenever bored</li>
+      </ul>
+      <div class="journal-note" style="margin-top:10px;">
+        <strong style="color:var(--ink);font-family:var(--mono);font-size:.72rem;">Emergency rule</strong><br>
+        Lock phone → stand up → drink water → start a 5-minute task. Don't negotiate for another 30 minutes.
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Urge management</h3>
+      <p>Use a practical, non-shame-based approach. Identify your actual triggers — being alone with unrestricted phone access, boredom, stress, staying in bed while awake, late-night scrolling — and address those specifically.</p>
+      <div class="journal-note">
+        <strong style="color:var(--ink);font-family:var(--mono);font-size:.72rem;">Protocol</strong><br>
+        Recognize the urge without judgment → put the phone away, change environment → wait 10 minutes doing something else (walk, stretch, wash face) → return to your planned activity.
+      </div>
+      <p class="muted" style="margin-top:10px;">If you slip, record the trigger and adjust — don't restart your whole life from zero. If this feels uncontrollable or causes real distress, talk to a qualified mental-health professional.</p>
+    </div>
+
+    <div class="card">
+      <h3>Non-negotiables</h3>
+      <ul class="rules-list">
+        <li>Never miss twice</li>
+        <li>Fixed minimum, not mood</li>
+        <li>Phone away during focused work</li>
+        <li>Protect sleep</li>
+        <li>Trading is not an escape from financial pressure</li>
+        <li>Weekly review every Sunday</li>
+        <li>Cut goals before you burn out on all of them</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
+
+<nav class="tabs">
+  <button data-target="sec-dashboard" class="active"><span class="dot"></span>Home</button>
+  <button data-target="sec-habits"><span class="dot"></span>Habits</button>
+  <button data-target="sec-sde"><span class="dot"></span>SDE</button>
+  <button data-target="sec-trading"><span class="dot"></span>Trading</button>
+  <button data-target="sec-roadmap"><span class="dot"></span>Roadmap</button>
+  <button data-target="sec-rules"><span class="dot"></span>Rules</button>
+</nav>
+
+<script>
+(function(){
+  // ---- Tabs ----
+  var tabs = document.querySelectorAll('nav.tabs button');
+  var sections = document.querySelectorAll('section');
+  tabs.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      tabs.forEach(function(b){ b.classList.remove('active'); });
+      sections.forEach(function(s){ s.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.target).classList.add('active');
+      window.scrollTo(0,0);
+    });
+  });
+
+  // ---- Theme ----
+  var themeBtn = document.getElementById('themeToggle');
+  function applyTheme(t){
+    document.body.setAttribute('data-theme', t);
+    themeBtn.textContent = t === 'dark' ? 'paper' : 'ink';
+    try{ localStorage.setItem('reset-os-theme', t); }catch(e){}
+  }
+  var savedTheme = 'dark';
+  try{ savedTheme = localStorage.getItem('reset-os-theme') || 'dark'; }catch(e){}
+  applyTheme(savedTheme);
+  themeBtn.addEventListener('click', function(){
+    applyTheme(document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+  });
+
+  // ---- Date / day count ----
+  var START_DATE = new Date('2026-09-17T00:00:00');
+  var today = new Date();
+  document.getElementById('todayLabel').textContent = today.toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
+  document.getElementById('habitDate').textContent = "Today — " + today.toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'short'});
+
+  var diffDays = Math.floor((today - START_DATE) / 86400000) + 1;
+  var dayCount = Math.max(1, Math.min(105, diffDays));
+  document.getElementById('dayCount').textContent = dayCount;
+
+  var phaseIdx, focusText;
+  if (dayCount <= 14) { phaseIdx = 1; focusText = "Phase 1 — Reset. Remove triggers, fix your sleep/wake time, study daily even if just 30 minutes."; }
+  else if (dayCount <= 44) { phaseIdx = 2; focusText = "Phase 2 — Build. Consistent Java/DSA, first structured project, exercise maintained."; }
+  else if (dayCount <= 74) { phaseIdx = 3; focusText = "Phase 3 — Execute. Deepen technical work, hit a project milestone, start internship prep."; }
+  else { phaseIdx = 4; focusText = "Phase 4 — Consolidate. Review the year, lock the 2027 SDE roadmap, decide on trading with evidence."; }
+  document.getElementById('focusText').textContent = focusText;
+  document.querySelectorAll('.phase-strip .p').forEach(function(p){
+    if (parseInt(p.dataset.phase) === phaseIdx) p.classList.add('now');
+  });
+
+  // ---- Checklist (per-day localStorage) ----
+  var dateKey = today.toISOString().slice(0,10);
+  var storageKey = 'reset-os-checklist-' + dateKey;
+  var boxes = document.querySelectorAll('#checklist input[type="checkbox"]');
+
+  function loadState(){
+    var state = {};
+    try{ state = JSON.parse(localStorage.getItem(storageKey) || '{}'); }catch(e){}
+    return state;
+  }
+  function saveState(state){
+    try{ localStorage.setItem(storageKey, JSON.stringify(state)); }catch(e){}
+  }
+  function refreshUI(){
+    var state = loadState();
+    var doneCount = 0;
+    boxes.forEach(function(box){
+      var li = box.closest('li');
+      var key = li.dataset.key;
+      var checked = !!state[key];
+      box.checked = checked;
+      li.classList.toggle('done', checked);
+      if (checked) doneCount++;
+    });
+    document.getElementById('progressLine').textContent = doneCount + ' / 7 complete';
+    document.getElementById('doneToday').textContent = doneCount + '/7';
+  }
+  boxes.forEach(function(box){
+    box.addEventListener('change', function(){
+      var state = loadState();
+      var key = box.closest('li').dataset.key;
+      state[key] = box.checked;
+      saveState(state);
+      refreshUI();
+    });
+  });
+  document.getElementById('resetToday').addEventListener('click', function(){
+    saveState({});
+    refreshUI();
+  });
+  refreshUI();
+})();
+</script>
+</body>
+</html>
